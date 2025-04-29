@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego de Preguntas - Piedad Bonnett</title>
+  <style>
+    /* Estilos generales */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+    h1 {
+      color: #333;
+    }
+    #juego {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+    .pregunta {
+      margin-bottom: 20px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      background-color: #f77f00;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #d35400;
+    }
+    .resultado {
+      font-size: 24px;
+      color: #2d3436;
+      margin-top: 20px;
+      animation: fadeIn 2s ease forwards;
+      opacity: 0;
+    }
+    .cronometro {
+      height: 10px;
+      background-color: #00b894;
+      width: 100%;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .progreso {
+      height: 100%;
+      background-color: #d63031;
+      width: 100%;
+      animation: reducir 20s linear forwards;
+    }
+    /* Animaciones */
+    @keyframes reducir {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .emoji {
+      font-size: 40px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Juego de Preguntas: Piedad Bonnett</h1>
+
+  <div id="juego">
+    <!-- Aquí se cargan las preguntas -->
+  </div>
+
+  <script>
+    const preguntas = [
+      { pregunta: "¿Qué tipo de terapia menciona Piedad Bonnett como parte de su intento por afrontar el dolor?", opciones: ["Terapia de grupo", "Terapia artística", "Terapia psicológica individual", "Terapia familiar"], respuestaCorrecta: 2, fondo: "#ffeaa7" },
+      { pregunta: "¿Qué actitud describe Piedad Bonnett respecto a los rituales sociales de duelo?", opciones: ["Los rechaza abiertamente", "Los considera necesarios pero insuficientes", "Los ve como inútiles y vacíos", "Los ignora por completo"], respuestaCorrecta: 1, fondo: "#fd79a8" },
+      { pregunta: "¿Qué sentimiento hacia la memoria de su hijo predomina en el capítulo 4?", opciones: ["Culpa", "Rabia", "Amor incondicional", "Desesperanza"], respuestaCorrecta: 2, fondo: "#55efc4" },
+      { pregunta: "¿Cómo describe la autora su forma de enfrentar los recuerdos dolorosos?", opciones: ["Evitándolos por completo", "Enfrentándolos como un acto de valentía", "Bloqueándolos a través de medicamentos", "Riéndose de ellos para superarlos"], respuestaCorrecta: 1, fondo: "#74b9ff" },
+      { pregunta: "¿Cómo reacciona inicialmente la familia ante los primeros síntomas?", opciones: ["Ignoran los síntomas", "Buscan ayuda médica inmediata", "Piensan que es una fase normal", "Envían al hijo al extranjero"], respuestaCorrecta: 1, fondo: "#a29bfe" },
+      { pregunta: "¿Qué actividad creativa desempeñaba el hijo?", opciones: ["La escultura", "La pintura", "La escritura", "La danza"], respuestaCorrecta: 1, fondo: "#fdcb6e" },
+      { pregunta: "¿Qué aspecto de la enfermedad era más incomprensible para los padres?", opciones: ["La agresividad", "La falta de motivación", "La desconexión de la realidad", "La pérdida de memoria"], respuestaCorrecta: 2, fondo: "#dfe6e9" },
+      { pregunta: "¿Qué sentimiento predomina en Piedad Bonnett al relatar el sufrimiento de su hijo?", opciones: ["Indiferencia", "Esperanza", "Desesperación", "Rabia"], respuestaCorrecta: 2, fondo: "#ff7675" },
+      { pregunta: "¿Qué crítica hace la autora sobre el sistema de salud?", opciones: ["La falta de apoyo económico", "La poca capacitación de los psiquiatras", "La deshumanización de los tratamientos", "La rapidez de los diagnósticos"], respuestaCorrecta: 2, fondo: "#81ecec" }
+    ];
+
+    let preguntaActual = 0;
+    let puntaje = 0;
+    let temporizador;
+
+    function mostrarPregunta() {
+      const contenedor = document.getElementById('juego');
+      contenedor.innerHTML = '';
+      const p = preguntas[preguntaActual];
+
+      // Cambiar fondo de la pregunta
+      document.body.style.backgroundColor = p.fondo;
+
+      const div = document.createElement('div');
+      div.classList.add('pregunta');
+      div.innerHTML = `<h2>${p.pregunta}</h2>`;
+
+      p.opciones.forEach((opcion, index) => {
+        const boton = document.createElement('button');
+        boton.innerText = opcion;
+        boton.onclick = () => verificarRespuesta(index, p);
+        div.appendChild(boton);
+      });
+
+      contenedor.appendChild(div);
+
+      // Mostrar el cronómetro
+      const cronometroDiv = document.createElement('div');
+      cronometroDiv.classList.add('cronometro');
+      const progreso = document.createElement('div');
+      progreso.classList.add('progreso');
+      cronometroDiv.appendChild(progreso);
+      contenedor.appendChild(cronometroDiv);
+
+      // Temporizador de 20 segundos
+      temporizador = setTimeout(() => {
+        alert('⏰ Tiempo agotado. Pasamos a la siguiente pregunta.');
+        preguntaActual++;
+        mostrarPregunta();
+      }, 20000);
+    }
+
+    function verificarRespuesta(indice, pregunta) {
+      const contenedor = document.getElementById('juego');
+      clearTimeout(temporizador); // Detener el cronómetro
+
+      if (indice === pregunta.respuestaCorrecta) {
+        puntaje++;
+        contenedor.innerHTML = `
+          <div class="resultado">
+            <p>¡Correcto! 🎉</p>
+            <p class="emoji">👍 ¡Bien hecho! Estás en el camino correcto.</p>
+          </div>
+        `;
+      } else {
+        contenedor.innerHTML = `
+          <div class="resultado">
+            <p>Incorrecto 😞</p>
+            <p class="emoji">❌ Algo no está bien, ¡pero sigue intentándolo!</p>
+          </div>
+        `;
+      }
+
+      setTimeout(() => {
+        preguntaActual++;
+        if (preguntaActual < preguntas.length) {
+          mostrarPregunta();
+        } else {
+          mostrarResultado();
+        }
+      }, 2000);
+    }
+
+    function mostrarResultado() {
+      const contenedor = document.getElementById('juego');
+      contenedor.innerHTML = `
+        <div class="resultado">
+          <h2>🎉 Juego terminado 🎉</h2>
+          <p>Tu puntaje fue: <strong>${puntaje}</strong> de <strong>${preguntas.length}</strong></p>
+          <br>
+          <h3>✨ Mensaje para Estudiantes de Gestión en Moda ✨</h3>
+          <p style="font-size: 18px; margin-top: 15px; color: #636e72;">
+            Recuerda que, al igual que en la vida y en el arte, cada desafío es una oportunidad para brillar. <br><br>
+            ¡Sigue creando, innovando y dejando tu huella en el mundo de la moda! 👗🎨<br><br>
+            ¡Nunca dejes de aprender y de creer en tu talento! 🌟
+          </p>
+        </div>
+      `;
+    }
+
+    // Iniciar el juego
+    mostrarPregunta();
+  </script>
+
+</body>
+</html>
+
+
+
